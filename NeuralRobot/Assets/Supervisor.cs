@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Assets;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.WSA.Input;
@@ -56,6 +57,9 @@ public class Supervisor : MonoBehaviour {
         {
             bestScore = getScore();
             _n2 = new NeuralNetwork(_n1);
+            FileManager.SaveNetworkToFile(_n2, @"C:\Users\Kuba\Desktop\network.json");
+            var x = FileManager.ReadNetworkFromFile(@"C:\Users\Kuba\Desktop\network.json");
+            Debug.Log(x);
         }
         else
         {

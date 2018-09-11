@@ -1,23 +1,32 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 public class NeuralNetwork
 {
 
-    private readonly int[] _layers;
+    public readonly int[] Layers;
 
-    private float[][] _neurons;
+    public float[][] Neurons;
 
-    private float[][][] _weights;
+    public float[][][] Weights;
+
+    [JsonConstructor]
+    public NeuralNetwork(int[] layers, float[][] neurons, float[][][] weights)
+    {
+        Layers = layers;
+        Neurons = neurons;
+        Weights = weights;
+    }
 
     public NeuralNetwork(int[] layers)
     {
-        _layers = new int[layers.Length];
+        Layers = new int[layers.Length];
         for (int i = 0; i < layers.Length; i++)
         {
-            _layers[i] = layers[i];
+            Layers[i] = layers[i];
         }
 
         InitNeurons();
@@ -26,15 +35,15 @@ public class NeuralNetwork
 
     public NeuralNetwork(NeuralNetwork networkToCopy)
     {
-        _layers = new int[networkToCopy._layers.Length];
-        for (int i = 0; i < networkToCopy._layers.Length; i++)
+        Layers = new int[networkToCopy.Layers.Length];
+        for (int i = 0; i < networkToCopy.Layers.Length; i++)
         {
-            _layers[i] = networkToCopy._layers[i];
+            Layers[i] = networkToCopy.Layers[i];
         }
 
         InitNeurons();
         InitWeights();
-        CopyWeights(networkToCopy._weights);
+        CopyWeights(networkToCopy.Weights);
 
     }
 
@@ -46,7 +55,7 @@ public class NeuralNetwork
             {
                 for (int k = 0; k < weightsToCopy[i][j].Length; k++)
                 {
-                    _weights[i][j][k] = weightsToCopy[i][j][k];
+                    Weights[i][j][k] = weightsToCopy[i][j][k];
                 }
             }
         }
@@ -56,25 +65,25 @@ public class NeuralNetwork
     {
         var neuronsList = new List<float[]>();
 
-        for (int i = 0; i < _layers.Length; i++)
+        for (int i = 0; i < Layers.Length; i++)
         {
-            neuronsList.Add(new float[_layers[i]]);
+            neuronsList.Add(new float[Layers[i]]);
         }
 
-        _neurons = neuronsList.ToArray();
+        Neurons = neuronsList.ToArray();
     }
 
     private void InitWeights()
     {
         var weightsList = new List<float[][]>();
 
-        for (int i = 1; i < _layers.Length; i++)
+        for (int i = 1; i < Layers.Length; i++)
         {
             var layerWeightsList = new List<float[]>();
 
-            int neuronsInPreviousLayer = _layers[i - 1];
+            int neuronsInPreviousLayer = Layers[i - 1];
 
-            for (int j = 0; j < _neurons[i].Length; j++)
+            for (int j = 0; j < Neurons[i].Length; j++)
             {
                 float[] neuronWeights = new float[neuronsInPreviousLayer];
 
@@ -88,43 +97,43 @@ public class NeuralNetwork
             weightsList.Add(layerWeightsList.ToArray());
         }
 
-        _weights = weightsList.ToArray();
+        Weights = weightsList.ToArray();
     }
 
     public float[] FeedForward(float[] inputs)
     {
         for (int i = 0; i < inputs.Length; i++)
         {
-            _neurons[0][i] = inputs[i];
+            Neurons[0][i] = inputs[i];
         }
 
-        for (int i = 1; i < _layers.Length; i++)
+        for (int i = 1; i < Layers.Length; i++)
         {
-            for (int j = 0; j < _neurons[i].Length; j++)
+            for (int j = 0; j < Neurons[i].Length; j++)
             {
                 float value = 0.25f;
 
-                for (int k = 0; k < _neurons[i - 1].Length; k++)
+                for (int k = 0; k < Neurons[i - 1].Length; k++)
                 {
-                    value += _weights[i - 1][j][k] * _neurons[i - 1][k];
+                    value += Weights[i - 1][j][k] * Neurons[i - 1][k];
                 }
 
-                _neurons[i][j] = (float)Math.Tanh(value);
+                Neurons[i][j] = (float)Math.Tanh(value);
             }
         }
 
-        return _neurons[_neurons.Length - 1];
+        return Neurons[Neurons.Length - 1];
     }
 
     public void Mutate()
     {
-        for (int i = 0; i < _weights.Length; i++)
+        for (int i = 0; i < Weights.Length; i++)
         {
-            for (int j = 0; j < _weights[i].Length; j++)
+            for (int j = 0; j < Weights[i].Length; j++)
             {
-                for (int k = 0; k < _weights[i][j].Length; k++)
+                for (int k = 0; k < Weights[i][j].Length; k++)
                 {
-                    float weight = _weights[i][j][k];
+                    float weight = Weights[i][j][k];
 
                     var mutationSelector = new System.Random().Next() % 4;
 
@@ -144,7 +153,7 @@ public class NeuralNetwork
                             break;
                     }
 
-                    _weights[i][j][k] = weight;
+                    Weights[i][j][k] = weight;
                 }
             }
         }
